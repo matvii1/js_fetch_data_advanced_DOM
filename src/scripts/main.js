@@ -20,7 +20,7 @@ const request = (url) => {
 
 const getPhoneInfo = (url) => {
   return request(`${DETAILS_URL}${url}.json`);
-}
+};
 
 const getPhoneIdList = () => {
   return request(LIST_URL)
@@ -35,8 +35,6 @@ const getPhoneIdList = () => {
 
 getPhoneIdList()
   .then(idArr => {
-    console.log(getFirstReceivedDetails(idArr));
-
     return getFirstReceivedDetails(idArr);
   })
   .then(res => {
@@ -51,8 +49,6 @@ const getFirstReceivedDetails = (arr) => {
 // all successful promises
 getPhoneIdList()
   .then(idArr => {
-    console.log(getAllSuccessfulDetails(idArr));
-
     return getAllSuccessfulDetails(idArr);
   })
   .then(res => showNotification('all-successful', `All Successful`, res));
@@ -76,4 +72,21 @@ const showNotification = (type, header, textArr) => {
     ul.insertAdjacentHTML('beforeend', `
     <li>${listText}</li>`);
   }
-}
+};
+
+// get three fastest
+getPhoneIdList()
+  .then(idArr => getThreeFastestDetails(idArr));
+
+const getThreeFastestDetails = (arr) => {
+  const threeFastest = [];
+
+  for (let i = 0; i < 3; i++) {
+    const firstPromise = Promise.race(arr.map(id => getPhoneInfo(id)));
+
+    arr.splice(1, arr.indexOf(firstPromise.then(res => res.id)));
+    threeFastest.push(firstPromise);
+  };
+
+  return threeFastest;
+};
